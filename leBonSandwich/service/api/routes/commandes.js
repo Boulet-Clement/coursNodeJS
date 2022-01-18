@@ -32,7 +32,16 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/:id', function(req, res, next) {
-    res.status(200).json(commandes.commandes.find( commande => commande.id === req.params.id))
+    let commande = commandes.commandes.find( commande => commande.id === req.params.id)
+    if(commande != null){
+        res.status(200).json(commande)
+    }else{
+        res.status(400).json({
+            "type": "error",
+            "error": 404,
+            "message": `ressource non disponible : ${req.params.id}`});
+    }
+    
 });
 
 module.exports = router;
