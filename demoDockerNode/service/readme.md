@@ -12,7 +12,7 @@
 
 - Entrer dans le container : 
 
-`docker exec -ti <nom-du-service bash`
+`docker exec -ti <nom-du-service> bash`
 
 - Consulter l'API (changer le port selon si on execute la commande sur l'ordinateur ou dans le container)
 
