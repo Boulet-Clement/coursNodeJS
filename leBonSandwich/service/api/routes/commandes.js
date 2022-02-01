@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const knex = require('../knex.js');
 
 let commandes = {
     "type": "collection",
@@ -28,7 +29,56 @@ let commandes = {
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.status(200).json(commandes);
+    knex.from('commande')
+        .select('*')
+        .then((commandes) => {
+            console.log(commandes)
+            if (commandes == null){
+                res.status(404).json({
+                    "type": "error",
+                    "error": 404,
+                    "message": `ressources non disponibles`});
+            }else{
+                res.status(200).json(commandes)
+            }
+        }).catch((err) => {
+            res.status(500).json({
+                "type": "error",
+                "error": 500,
+                "message": `Erreur de connexion à la base de données ` + err});
+            })
+        .finally(() => {
+        // knex.destroy();
+        });
+});
+
+router.get('/:id', function(req, res, next) {
+    
+    knex.from('commande')
+        .select('*')
+        .where({
+            'id': req.params.id
+          }).first()
+        .then((commande) => {
+            console.log(commande)
+            if (commande == null){
+                res.status(404).json({
+                    "type": "error",
+                    "error": 404,
+                    "message": `ressource non disponible : ${req.params.id}`});
+            }else{
+                res.status(200).json(commande)
+            }
+        }).catch((err) => {
+            res.status(500).json({
+                "type": "error",
+                "error": 500,
+                "message": `Erreur de connexion à la base de données` + err});
+            })
+        .finally(() => {
+        // knex.destroy();
+        });
+    
 });
 
 router.get('/:id', function(req, res, next) {
@@ -41,7 +91,6 @@ router.get('/:id', function(req, res, next) {
             "error": 404,
             "message": `ressource non disponible : ${req.params.id}`});
     }
-    
 });
 
 module.exports = router;
