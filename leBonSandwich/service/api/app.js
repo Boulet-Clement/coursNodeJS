@@ -15,8 +15,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
 app.use('/commandes', commandesRouter);
+app.use('/', indexRouter);
+
 
 app.listen(port, ()=> {
     console.log(`Serveur is listening at localhost:${port}`)
