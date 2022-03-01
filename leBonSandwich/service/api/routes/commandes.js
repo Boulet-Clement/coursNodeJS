@@ -67,7 +67,7 @@ router.get('/:id', function (req, res, next) {
 
 });
 
-router.get('/:id', function (req, res, next) {
+/*router.get('/:id', function (req, res, next) {
     let commande = commandes.commandes.find(commande => commande.id === req.params.id)
     if (commande != null) {
         res.status(200).json(commande)
@@ -78,6 +78,51 @@ router.get('/:id', function (req, res, next) {
             "message": `ressource non disponible : ${req.params.id}`
         });
     }
-});
+});*/
+
+router.put('/:id', async function (req, res, next) {
+    let commande;
+    console.log(htmlEntities(req.body.nom))
+    try {
+        if(req.body.nom){
+            req.body.nom = htmlEntities(req.body.nom)
+        }
+        if(req.body.mail){
+            req.body.mail = htmlEntities(req.body.mail)
+        }
+        if(req.body.livraison){
+            req.body.livraison = htmlEntities(req.body.livraison)
+        }
+      await knex.from('commande').where('id', req.params.id).update({
+        nom: req.body.nom,
+        mail: req.body.mail,
+        livraison: req.body.livraison,
+        updated_at: new Date()
+      }).then((rows) => {
+        if (rows === 0) {
+            res.status(404).json({
+            "type": "error",
+            "error": 404,
+            "message": `commande ${req.params.id} non trouvée`
+                });
+        } else {
+            res.status(204).json(commande);
+        }
+        });
+    }catch (error) {
+      console.log(error);
+      res.status(500).json({
+        "type": "error",
+        "error": 500,
+        "message": `Impossible d'executer la requete`
+    });
+    }
+    function htmlEntities(str) {
+        if(str === ""){
+            return null
+        }else 
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&quot');
+    }
+  });
 
 module.exports = router;
