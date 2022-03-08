@@ -7,7 +7,7 @@ const indexRouter = require('./routes/index');
 const commandesRouter = require('./routes/commandes');
 
 const app = express();
-const port = 4444
+const port = 3333
 
 app.use(logger('dev'));
 app.use(express.json());
