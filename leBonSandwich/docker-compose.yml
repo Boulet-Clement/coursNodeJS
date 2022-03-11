@@ -18,6 +18,23 @@ services:
     networks:
       - sandwich
 
+  iut_sandwich_suivi_fabrication:
+    container_name: iut_sandwich_suivi_fabrication
+    image: node:lts
+    env_file: ./service/.env
+    working_dir: /usr/src/app
+    volumes:
+      - ./service/suiviFabrication:/usr/src/app
+    ports:
+      - 3334:3001
+    command: npm run watch
+    depends_on:
+      - iut_db_sandwich
+    links:
+      - iut_db_sandwich
+    networks:
+      - sandwich
+
   iut_adminer:
     container_name: iut_adminer
     image: adminer
