@@ -53,7 +53,7 @@ router.route('/add')
         const updated_at = created_at;
         //const created_at = new Date();
         //const updated_at = created_at;
-        const { livraison, nom, mail, montant } = req.body;
+        const { livraison, nom, mail, items } = req.body;
         const token = uuidv4();
         const client_id = null;
         const ref_paiement = null;
@@ -61,6 +61,15 @@ router.route('/add')
         const mode_paiement = null;
         const remise = null;
         const status = 1;
+        let montant = 0;
+        if(items){
+            items.forEach(item => {
+                console.log(item.q)
+                console.log(item.tarif)
+                console.log(montant)
+                montant += item.q * item.tarif
+            });
+        }
         knex.from('commande').insert(
             {
                 'id': uuid,
@@ -79,10 +88,31 @@ router.route('/add')
                 'status': status
             }
         ).then(() => {
+            if (items != []){
+                items.forEach(item => {
+                    if (item.uri && item.q && item.libelle && item.tarif){
+                        // Insert
+                        console.log("hey")
+                        knex.from('item').insert(
+                            {
+                                'uri' : item.uri,
+                                'libelle' : item.libelle,
+                                'tarif': item.tarif,
+                                'quantite': item.q,
+                                'command_id': uuid
+                            }
+                        ).catch((err) => {
+                            console.log(err)
+                        })
+                    }
+                });
+            
+            }
             res.status(201).json({
                 "token" : token,
                 "Location" : `/commandes/${uuid}`
             })
+            
         }
         ).catch((err) => {
             res.status(500).json({
