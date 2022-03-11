@@ -49,7 +49,7 @@ router.route('/add')
     .post(function (req, res, next) {
         //uuidv4
         const uuid = uuidv4();
-        const created_at = "2019-11-08 13:45:55"
+        const created_at = "2019-11-08 13:45:55" // A Modifier
         const updated_at = created_at;
         //const created_at = new Date();
         //const updated_at = created_at;
@@ -94,6 +94,7 @@ router.route('/add')
                         // Insert
                         console.log("hey")
                         knex.from('item').insert(
+                            //Utiliser joi pour valider
                             {
                                 'uri' : item.uri,
                                 'libelle' : item.libelle,
@@ -109,8 +110,15 @@ router.route('/add')
             
             }
             res.status(201).json({
-                "token" : token,
-                "Location" : `/commandes/${uuid}`
+                "Location" : `/commandes/${uuid}`,
+                "commande": {
+                    "nom" : nom,
+                    "mail" : mail,
+                    "date_livraison" : livraison,
+                    "id" : uuid,
+                    "token" : token,
+                    "montant" : montant
+                }
             })
             
         }
