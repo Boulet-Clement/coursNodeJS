@@ -2,9 +2,12 @@ const express = require('express');
 const router = express.Router();
 const knex = require('../knex.js');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken')
 const { v4: uuidv4 } = require('uuid');
 
 const methodNotAllowed = require('../errors/methodNotAllowed.js');
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /* GET home page. */
 router.route('/')
@@ -78,6 +81,42 @@ router.route('/signup')
                     'updated_at': updated_at,
                 }
             })
+        })
+        .catch((err) => {
+            res.status(500).json({
+                "type": "error",
+                "error": 500,
+                "message": `Erreur de connexion à la base de données ` + err
+            });
+        })
+    })
+    .get(methodNotAllowed)
+
+router.route('/signin')
+// Il faut gerer le fait que les adresse mails peuvent etre en doublon
+    .patch(methodNotAllowed)
+    .delete(methodNotAllowed)
+    .put(methodNotAllowed)
+    .post(async (req, res, next ) => {
+        const { mail_client, password } = req.body
+        knex.from('client').select('id','nom_client', 'mail_client','passwd', 'cumul_achats', 'created_at', 'updated_at')
+        .where({
+            'mail_client': mail_client
+        }).first()
+        .then(async(user) => {
+            if (!user) { res.status(400).json({ error: "Invalid username or password", status: "error" }); return; }
+
+            if (! await bcrypt.compare(password, user.passwd)) { res.status(400).json({ error: "Invalid username or password", status: "error" }); return; }
+        
+            const token = jwt.sign(
+                {
+                    id: user._id,
+                    username: user.username
+                },
+                JWT_SECRET
+            );
+        
+            res.status(200).json({ data: token, status: "ok" });
         })
         .catch((err) => {
             res.status(500).json({
