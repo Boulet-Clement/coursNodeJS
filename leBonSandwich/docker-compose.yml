@@ -35,6 +35,23 @@ services:
     networks:
       - sandwich
 
+  iut_sandwich_auth_service:
+    container_name: iut_sandwich_auth_service
+    image: node:lts
+    env_file: ./service/.env
+    working_dir: /usr/src/app
+    volumes:
+      - ./service/auth_service:/usr/src/app
+    ports:
+      - 3335:3002
+    command: npm run watch
+    depends_on:
+      - iut_db_sandwich
+    links:
+      - iut_db_sandwich
+    networks:
+      - sandwich
+
   iut_adminer:
     container_name: iut_adminer
     image: adminer
