@@ -42,8 +42,25 @@ services:
     working_dir: /usr/src/app
     volumes:
       - ./service/auth_service:/usr/src/app
+    #ports:
+      #- 3335:3002
+    command: npm run watch
+    depends_on:
+      - iut_db_sandwich
+    links:
+      - iut_db_sandwich
+    networks:
+      - sandwich
+
+  iut_sandwich_gateway:
+    container_name: iut_sandwich_gateway
+    image: node:lts
+    env_file: ./service/.env
+    working_dir: /usr/src/app
+    volumes:
+      - ./service/gateway:/usr/src/app
     ports:
-      - 3335:3002
+      - 3336:3003
     command: npm run watch
     depends_on:
       - iut_db_sandwich
