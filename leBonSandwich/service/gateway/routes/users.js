@@ -51,7 +51,10 @@ router.route('/:id')
     .post(methodNotAllowed)
     .put(methodNotAllowed)
     .get(function (req, res, next) {
+        axios.get('/users/' + req.params.id).then(resp => {
+            res.json(resp.data)
             return res
+        })
     })
 
 module.exports = router;
