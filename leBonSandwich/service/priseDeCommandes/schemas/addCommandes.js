@@ -2,11 +2,10 @@ const Joi = require('joi');
 
 const schema = Joi.object({
     uuid : 
-        Joi .string()
-            .alphanum()
-            .min(3)
-            .max(255)
-            .required(),
+    Joi .string()
+        .min(3)
+        .max(255)
+        .required(),
 
     created_at :
     Joi .string()
@@ -16,8 +15,19 @@ const schema = Joi.object({
     Joi .string()
         .pattern(new RegExp('^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}$')),
 
+    nom : 
+    Joi .string().alphanum()
+        .min(3)
+        .max(255)
+        .required(),
+
+    mail: 
+    Joi .string()
+        .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
     
 })
+
+module.exports = schema
 
 /*const uuid = uuidv4();
         const created_at = "2019-11-08 13:45:55" // A Modifier
