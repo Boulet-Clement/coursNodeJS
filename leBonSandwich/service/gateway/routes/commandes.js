@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
+const monAxios = require('../axios/axios')
+
 const methodNotAllowed = require('../errors/methodNotAllowed.js');
+
+const url = "http://iut_sandwich_suivi_fabrication:3001"
+const axios = monAxios(url)
 
 /* GET home page. */
 router.route('/')
@@ -10,35 +15,10 @@ router.route('/')
     .put(methodNotAllowed)
     .post(methodNotAllowed)
     .get(function (req, res, next) {
-        return res
+        axios.get('/commandes' + req.path).then(resp => {
+        res.json(resp.data)
+        })
     })
 
-router.route('/add')
-    .patch(methodNotAllowed)
-    .delete(methodNotAllowed)
-    .put(methodNotAllowed)
-    .post(function (req, res, next) {
-        return res
-    })
-    .get(methodNotAllowed)
-
-router.route('/:id')
-    .patch(methodNotAllowed)
-    .delete(methodNotAllowed)
-    .post(methodNotAllowed)
-    .get(function (req, res, next) {
-     return res
-    })
-    .put(async function (req, res, next) {
-        return res
-    });
-
-router.route('/:id/items')
-    .patch(methodNotAllowed)
-    .delete(methodNotAllowed)
-    .post(methodNotAllowed)
-    .get(function (req, res, next) {
-        return res
-    });
 
 module.exports = router;
