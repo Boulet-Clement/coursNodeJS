@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const knex = require('../knex.js');
+const schemaAjoutCommande = require('../schemas/addCommandes');
 const { v4: uuidv4 } = require('uuid');
 
 const methodNotAllowed = require('../errors/methodNotAllowed.js');
@@ -49,10 +50,8 @@ router.route('/add')
     .post(function (req, res, next) {
         //uuidv4
         const uuid = uuidv4();
-        const created_at = "2019-11-08 13:45:55" // A Modifier
+        const created_at = "2019-11-08 13:45:55" // A Modifier pour avoir la date du jour
         const updated_at = created_at;
-        //const created_at = new Date();
-        //const updated_at = created_at;
         const { livraison, nom, mail, items } = req.body;
         const token = uuidv4();
         const client_id = null;
@@ -70,65 +69,88 @@ router.route('/add')
                 montant += item.q * item.tarif
             });
         }
-        knex.from('commande').insert(
-            {
-                'id': uuid,
-                'created_at': created_at,
-                'updated_at': updated_at,
-                'livraison': livraison,
-                'nom': nom,
-                'mail': mail,
-                'montant': montant,
-                'remise': remise,
-                'token': token,
-                'client_id': client_id,
-                'ref_paiement': ref_paiement,
-                'date_paiement': date_paiement,
-                'mode_paiement': mode_paiement,
-                'status': status
-            }
-        ).then(() => {
-            if (items != []){
-                items.forEach(item => {
-                    if (item.uri && item.q && item.libelle && item.tarif){
-                        // Insert
-                        console.log("hey")
-                        knex.from('item').insert(
-                            //Utiliser joi pour valider
-                            {
-                                'uri' : item.uri,
-                                'libelle' : item.libelle,
-                                'tarif': item.tarif,
-                                'quantite': item.q,
-                                'command_id': uuid
-                            }
-                        ).catch((err) => {
-                            console.log(err)
-                        })
-                    }
-                });
-            
-            }
-            res.status(201).json({
-                "Location" : `/commandes/${uuid}`,
-                "commande": {
-                    "nom" : nom,
-                    "mail" : mail,
-                    "date_livraison" : livraison,
-                    "id" : uuid,
-                    "token" : token,
-                    "montant" : montant
-                }
+        try{
+            //Joi
+            const validate = schemaAjoutCommande.validate({
+                uuid : uuid,
+                created_at : created_at,
+                updated_at : updated_at,
+                nom : nom,
+                mail : mail
             })
-            
-        }
-        ).catch((err) => {
+            if (!validate.error){
+                knex.from('commande').insert(
+                    {
+                        'id': uuid,
+                        'created_at': created_at,
+                        'updated_at': updated_at,
+                        'livraison': livraison,
+                        'nom': nom,
+                        'mail': mail,
+                        'montant': montant,
+                        'remise': remise,
+                        'token': token,
+                        'client_id': client_id,
+                        'ref_paiement': ref_paiement,
+                        'date_paiement': date_paiement,
+                        'mode_paiement': mode_paiement,
+                        'status': status
+                    }
+                ).then(() => {
+                    if (items != []){
+                        items.forEach(item => {
+                            if (item.uri && item.q && item.libelle && item.tarif){
+                                knex.from('item').insert(
+                                    {
+                                        'uri' : item.uri,
+                                        'libelle' : item.libelle,
+                                        'tarif': item.tarif,
+                                        'quantite': item.q,
+                                        'command_id': uuid
+                                    }
+                                ).catch((err) => {
+                                    console.log(err)
+                                })
+                            }
+                        });
+                    
+                    }
+                    res.status(201).json({
+                        "Location" : `/commandes/${uuid}`,
+                        "commande": {
+                            "nom" : nom,
+                            "mail" : mail,
+                            "date_livraison" : livraison,
+                            "id" : uuid,
+                            "token" : token,
+                            "montant" : montant
+                        }
+                    })
+                    
+                }
+                ).catch(() => {
+                    res.status(500).json({
+                        "type": "error",
+                        "error": 500,
+                        "message": `L'un des champs semble incorrect`
+                    });
+                })
+            }else{
+                res.status(500).json({
+                    "type": "error",
+                    "error": 500,
+                    "message": `L'un des champs semble incorrect`
+                });
+            }
+
+        }catch(err){
             res.status(500).json({
                 "type": "error",
                 "error": 500,
-                "message": `Erreur de connexion à la base de données ` + err
+                "message": `L'un des champs semble incorrect`
             });
-        })
+        }
+        
     })
     .get(methodNotAllowed)
 
