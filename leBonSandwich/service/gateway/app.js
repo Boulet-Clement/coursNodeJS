@@ -10,6 +10,10 @@ const commandesRouter = require('./routes/commandes');
 const app = express();
 const port = 3336
 
+const authMiddleware = require('./middlewares/auth');
+
+app.use(authMiddleware);
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
